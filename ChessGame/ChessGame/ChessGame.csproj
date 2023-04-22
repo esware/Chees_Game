@@ -12,6 +12,7 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -46,16 +47,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="ChessBoard.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Hamle.cs" />
+    <Compile Include="Oyun.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="Pozisyon.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Tahta.cs" />
+    <Compile Include="Taslar\At.cs" />
+    <Compile Include="Taslar\Fil.cs" />
+    <Compile Include="Taslar\Tas.cs" />
+    <Compile Include="Taslar\Kale.cs" />
+    <Compile Include="Taslar\Kral.cs" />
+    <Compile Include="Taslar\Piyon.cs" />
+    <Compile Include="Taslar\Vezir.cs" />
+    <EmbeddedResource Include="ChessBoard.resx">
+      <DependentUpon>ChessBoard.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
