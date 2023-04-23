@@ -17,8 +17,6 @@ namespace ChessGame
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new ChessBoard());
-            Oyun oyun = new Oyun();
-            oyun.Oyna();
         }
     }
 }
