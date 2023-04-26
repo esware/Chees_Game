@@ -12,71 +12,46 @@ namespace ChessGame.Taslar
         }
         public override bool CanMove(int row, int col, ChessBoard board)
         {
-            // Hedeflenen karede taş varsa piyon oraya gidemez.
-            if (board.IsOccupied(row, col))
-            {
-                return false;
-            }
-
-            // Piyon yalnızca ileri doğru hareket edebilir.
-            int rowDiff = this.CurrentRow-row;
-            int colDiff = this.CurrentColumn-col;
+            int rowDiff = CurrentRow - row;
+            int colDiff = CurrentColumn - col;
+            bool notDiff = colDiff == 0 && rowDiff == 0;
 
             if (this.Color == PieceColor.White)
             {
-                // Beyaz piyon sadece ileri hareket edebilir.
-                if (rowDiff <= 0)
+                if (IsFirstMove && colDiff == 0 && rowDiff == 2)
                 {
-                    return false;
-                }
-
-                // İlk hareketinde, piyon iki kare ileri gidebilir.
-                if (this.IsFirstMove && rowDiff == 2 && colDiff == 0)
-                {
-                    // Ara kare boşsa ve piyonun yolu engellenmiyorsa, piyon ilerleyebilir.
-                    int intermediateRow = this.CurrentRow - 1;
-                    if (!board.IsOccupied(intermediateRow, this.CurrentColumn) && !board.IsOccupied(row, col))
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    // İleri hareket etmek isteyen piyonlar sadece bir kare ilerleyebilir.
-                    if (rowDiff != 1 || colDiff != 0)
+                    if (notDiff)
                     {
                         return false;
                     }
+                    return true;
+                }
+                
+                else if (rowDiff == 1 && colDiff == 0)
+                {
+                    return true;
+                }
+
+            }
+            if (this.Color == PieceColor.Black)
+            {
+                if (IsFirstMove && colDiff == 0 && rowDiff == -2)
+                {
+                    if (notDiff)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+                
+                else if (rowDiff == -1 && colDiff == 0)
+                {
+                    return true;
                 }
                 
             }
-            else
-            {
-                // Siyah piyon sadece geri hareket edebilir.
-                if (rowDiff >= 0)
-                {
-                    return false;
-                }
-
-                // İlk hareketinde, piyon iki kare geri gidebilir.
-                if (this.IsFirstMove && rowDiff == -2 && colDiff == 0)
-                {
-                    // Ara kare boşsa ve piyonun yolu engellenmiyorsa, piyon ilerleyebilir.
-                    int intermediateRow = this.CurrentRow - 1;
-                    if (!board.IsOccupied(intermediateRow, this.CurrentColumn) && !board.IsOccupied(row, col))
-                    {
-                        return true;
-                    }
-                }
-
-                // Geri hareket etmek isteyen piyonlar sadece bir kare geri ilerleyebilir.
-                if (rowDiff != -1 || colDiff != 0)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            
+            return false;
         }
 
     }

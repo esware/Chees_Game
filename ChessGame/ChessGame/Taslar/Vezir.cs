@@ -10,7 +10,23 @@ namespace ChessGame.Taslar
 
         public override bool CanMove(int row, int col, ChessBoard board)
         {
-            throw new NotImplementedException();
+            int rowDiff = Math.Abs(CurrentRow - row);
+            int colDiff = Math.Abs(CurrentColumn - col);
+            bool notDiff = colDiff == 0 && rowDiff == 0;
+
+
+
+
+        if (rowDiff == colDiff || (rowDiff == 0 || colDiff == 0))
+            {
+                if (notDiff)
+                {
+                    return false;
+                } 
+                return true;
+            }
+
+            return false;
         }
     }
 
