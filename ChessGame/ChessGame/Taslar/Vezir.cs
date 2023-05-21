@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Windows.Forms;
 
 namespace ChessGame.Taslar
 {
     public class Vezir : ChessPiece
     {
-        public Vezir(PieceColor color, ChessPieceType type, int row, int col) : base(color, type, row, col)
+        public Vezir(PieceColor color, ChessPieceType type, int row, int col, Button btn) : base(color, type, row, col, btn)
         {
         }
 
@@ -23,7 +24,11 @@ namespace ChessGame.Taslar
                 {
                     return false;
                 } 
-                return true;
+                ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
+                if (targetPiece == null || targetPiece.Color != this.Color)
+                {
+                    return true;
+                }
             }
 
             return false;

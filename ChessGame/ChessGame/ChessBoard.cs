@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using ChessGame.Taslar;
 
@@ -12,6 +8,7 @@ namespace ChessGame
 {
     public class ChessBoard : Form
     {
+        public Game game;
         private int tileSize = 60;
         private const int ROWS = 8;
         private const int COLUMNS = 8;
@@ -48,19 +45,19 @@ namespace ChessGame
                     {
                         if (j == 0 || j == 7) // Kale
                             pieces.Add(piece = new Kale(i == 0 ? PieceColor.Black : PieceColor.White,
-                                ChessPieceType.Kale, i, j));
+                                ChessPieceType.Kale, i, j,button));
                         else if (j == 1 || j == 6) // At
                             pieces.Add(piece = new At(i == 0 ? PieceColor.Black : PieceColor.White,
-                                ChessPieceType.At, i, j));
+                                ChessPieceType.At, i, j,button));
                         else if (j == 2 || j == 5) // Fil
                             pieces.Add(piece = new Fil(i == 0 ? PieceColor.Black : PieceColor.White,
-                                ChessPieceType.Fil, i, j));
+                                ChessPieceType.Fil, i, j,button));
                         else if (j == 3) // Vezir
                             pieces.Add(piece = new Vezir(i == 0 ? PieceColor.Black : PieceColor.White,
-                                ChessPieceType.Vezir, i, j));
+                                ChessPieceType.Vezir, i, j,button));
                         else if (j == 4) // Şah
                             pieces.Add(piece = new Kral(i == 0 ? PieceColor.Black : PieceColor.White,
-                                ChessPieceType.Kral, i, j));
+                                ChessPieceType.Kral, i, j,button));
 
                         if (piece != null)
                         {
@@ -72,7 +69,7 @@ namespace ChessGame
                     else if (i == 1 || i == 6) // Piyon
                     {
                         pieces.Add(piece = new Piyon(i == 1 ? PieceColor.Black : PieceColor.White,
-                            ChessPieceType.Piyon, i, j));
+                            ChessPieceType.Piyon, i, j,button));
                         button.BackgroundImage = piece.Image;
                         button.BackgroundImageLayout = ImageLayout.Stretch;
                         button.Tag = new Tuple<int, int>(i, j);
@@ -115,6 +112,9 @@ namespace ChessGame
             // Panelin konumunu ayarla
             panel1.Location = new Point((this.Width - panel1.Width) / 2, (this.Height - panel1.Height) / 2);
             this.Load += new System.EventHandler(this.ChessBoard_Load);
+
+            game = new Game();
+            game.GetCurrentPlayer();
         }
         
         private void InitializeComponent()
@@ -202,7 +202,6 @@ namespace ChessGame
             }
             return false;
         }
-
         public void UpdateBoard()
         {
             foreach (Control control in panel1.Controls)
@@ -225,7 +224,115 @@ namespace ChessGame
                 }
             }
         }
+        
+        public Tuple<int, int> FindKingPosition(PieceColor kingColor)
+        {
+            foreach (ChessPiece piece in pieces)
+            {
+                if (piece.Type == ChessPieceType.Kral && piece.Color == kingColor)
+                {
+                    return Tuple.Create(piece.CurrentRow, piece.CurrentColumn);
+                }
+            }
 
+            // Hedef renkteki kral bulunamazsa (-1, -1) dön
+            return Tuple.Create(-1, -1);
+        }
+
+        public List<Tuple<ChessPiece,Tuple<int, int>>> GetValidMoves(PieceColor color)
+        {
+            List<Tuple<ChessPiece, Tuple<int, int>>> validMoves = new List<Tuple<ChessPiece, Tuple<int, int>>>();
+
+            foreach (ChessPiece piece in pieces)
+            {
+                if (piece.Color == color)
+                {
+                    for (int row = 0; row < ROWS; row++)
+                    {
+                        for (int col = 0; col < COLUMNS; col++)
+                        {
+                            if (piece.CanMove(row, col, this))
+                            {
+                                validMoves.Add(Tuple.Create(piece, Tuple.Create(row, col)));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return validMoves;
+        }
+
+        
+        public bool IsKingInCheck(PieceColor kingColor, ChessBoard board)
+        {
+            // Hedef kralın pozisyonunu bulma
+            Tuple<int, int> kingPosition = board.FindKingPosition(kingColor);
+
+            // Tüm rakip taşları kontrol etme
+            foreach (ChessPiece piece in pieces)
+            {
+                if (piece.Color != kingColor)
+                {
+                    // Eğer rakip taş, hedef krala saldırabiliyorsa true döndür
+                    if (piece.CanMove(kingPosition.Item1, kingPosition.Item2, board))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public bool IsCheckmate(PieceColor kingColor, ChessBoard board)
+        {
+            if (!IsKingInCheck(kingColor, board))
+            {
+                // Sah tehdit altında değil, mat durumu yok
+                return false;
+            }
+
+            // Sahın tüm olası hareketlerini deneyerek mat durumunu kontrol etme
+            foreach (var piece in pieces)
+            {
+                if (piece != null && piece.Color == kingColor)
+                {
+                    for (int row = 0; row < ROWS; row++)
+                    {
+                        for (int col = 0; col < COLUMNS; col++)
+                        {
+                            if (piece.CanMove(row, col, board))
+                            {
+                                // Sah bu hamle ile tehdit altında olmayacak mı kontrol etme
+                                ChessPiece originalPiece = board.GetPieceAtPosition(piece.CurrentRow, piece.CurrentColumn);
+                                ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
+
+                                // Hamleyi geçici olarak yapma
+                                board.MovePiece(piece.CurrentRow, piece.CurrentColumn, row, col);
+
+                                // Sah tehdit altında mı kontrol etme
+                                bool isKingSafe = !IsKingInCheck(kingColor, board);
+
+                                // Hamleyi geri alma
+                                board.MovePiece(row, col, piece.CurrentRow, piece.CurrentColumn);
+                                board.MovePiece(originalPiece.CurrentRow, originalPiece.CurrentColumn, piece.CurrentRow,piece.CurrentColumn);
+                                board.MovePiece(targetPiece.CurrentRow, targetPiece.CurrentColumn, row,col);
+
+                                if (isKingSafe)
+                                {
+                                    // Sah bu hamle ile tehdit altında olmayacak, mat durumu yok
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Sahın tüm hamlelerini deneyerek tehditten kaçma şansı yok, mat durumu var
+            return true;
+        }
 
 
     }

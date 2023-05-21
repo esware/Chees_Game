@@ -50,6 +50,7 @@
     <Compile Include="ChessBoard.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Game.cs" />
     <Compile Include="InputHandler.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Pozisyon.cs" />

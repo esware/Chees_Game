@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace ChessGame.Taslar
 {
     public class Piyon:ChessPiece
     {
-        public Piyon(PieceColor color, ChessPieceType type, int row, int col) : base(color, type, row, col)
+        public Piyon(PieceColor color, ChessPieceType type, int row, int col,Button btn) : base(color, type, row, col,btn)
         {
             
         }
@@ -24,12 +25,28 @@ namespace ChessGame.Taslar
                     {
                         return false;
                     }
-                    return true;
+                    // Eğer hedef hücre dolu ise hareket engellenir
+                    if (!board.IsOccupied(row, col))
+                    {
+                        return true;
+                    }
                 }
                 
                 else if (rowDiff == 1 && colDiff == 0)
                 {
-                    return true;
+                    // Eğer hedef hücre dolu ise hareket engellenir
+                    if (!board.IsOccupied(row, col))
+                    {
+                        return true;
+                    }
+                }
+                else if (rowDiff == 1 && Math.Abs(colDiff) == 1)
+                {
+                    // Eğer hedef hücrede rakip taş varsa piyon taşıyı yiyor
+                    if (board.IsOccupied(row, col) && board.GetPieceAtPosition(row, col).Color == PieceColor.Black)
+                    {
+                        return true;
+                    }
                 }
 
             }
@@ -41,12 +58,27 @@ namespace ChessGame.Taslar
                     {
                         return false;
                     }
-                    return true;
+                    // Eğer hedef hücre dolu ise hareket engellenir
+                    if (!board.IsOccupied(row, col))
+                    {
+                        return true;
+                    }
                 }
-                
                 else if (rowDiff == -1 && colDiff == 0)
                 {
-                    return true;
+                    // Eğer hedef hücre dolu ise hareket engellenir
+                    if (!board.IsOccupied(row, col))
+                    {
+                        return true;
+                    }
+                }
+                else if (rowDiff == -1 && Math.Abs(colDiff) == 1)
+                {
+                    // Eğer hedef hücrede rakip taş varsa piyon taşıyı yiyor
+                    if (board.IsOccupied(row, col) && board.GetPieceAtPosition(row, col).Color == PieceColor.White)
+                    {
+                        return true;
+                    }
                 }
                 
             }

@@ -1,8 +1,18 @@
-﻿namespace ChessGame
+﻿using ChessGame.Taslar;
+
+namespace ChessGame
 {
-    public enum Player
+    public class Player
     {
-        White,
-        Black
+        public string Name { get; set; }
+        public PieceColor Color { get; set; }
+        public bool IsTurn { get; set; }
+
+        public Player(string name, PieceColor color)
+        {
+            Name = name;
+            Color = color;
+            IsTurn = false;
+        }
     }
 }

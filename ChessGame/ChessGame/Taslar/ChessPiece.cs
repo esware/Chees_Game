@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace ChessGame.Taslar
 {
@@ -9,20 +10,21 @@ namespace ChessGame.Taslar
     public abstract class ChessPiece
     {
         public bool IsFirstMove { get; set; } = true;
-        
         public bool IsSelected { get; set; } = false;
         public ChessPieceType Type { get;  }
         public PieceColor Color { get;  }
         public int CurrentRow { get; set; }
         public int CurrentColumn { get; set; }
         public Image Image { get; set; }
+        public Button Button { get; set; }
 
-        public ChessPiece(PieceColor color, ChessPieceType type, int row, int col)
+        public ChessPiece(PieceColor color, ChessPieceType type, int row, int col,Button btn)
         {
             this.Type = type;
             this.CurrentRow = row;
             this.CurrentColumn = col;
             this.Color = color;
+            this.Button = btn;
             
             string imageName = @"C:\Users\srht4\Desktop\Satranc_Projesi\Chees_Game\ChessGame\Resources\"+color + "_" + type + ".png";
             try
