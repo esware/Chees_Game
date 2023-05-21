@@ -277,6 +277,7 @@ namespace ChessGame
                     // Eğer rakip taş, hedef krala saldırabiliyorsa true döndür
                     if (piece.CanMove(kingPosition.Item1, kingPosition.Item2, board))
                     {
+                        GetPieceAtPosition(kingPosition.Item1, kingPosition.Item2).Button.BackColor = Color.Red;
                         return true;
                     }
                 }
