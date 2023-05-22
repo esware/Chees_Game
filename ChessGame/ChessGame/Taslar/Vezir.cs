@@ -11,28 +11,46 @@ namespace ChessGame.Taslar
 
         public override bool CanMove(int row, int col, ChessBoard board)
         {
-            int rowDiff = Math.Abs(CurrentRow - row);
-            int colDiff = Math.Abs(CurrentColumn - col);
-            bool notDiff = colDiff == 0 && rowDiff == 0;
 
+            int rowDiff = Math.Abs(row - CurrentRow);
+            int colDiff = Math.Abs(col - CurrentColumn);
 
-
-
-        if (rowDiff == colDiff || (rowDiff == 0 || colDiff == 0))
+            if (rowDiff != 0 && colDiff != 0 && rowDiff != colDiff)
             {
-                if (notDiff)
-                {
-                    return false;
-                } 
-                ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
-                if (targetPiece == null || targetPiece.Color != this.Color)
-                {
-                    return true;
-                }
+                return false; // Vezir sadece düz, çapraz veya yatay hareket edebilir.
             }
 
-            return false;
+            int rowDirection = 0;
+            int colDirection = 0;
+
+            if (row != CurrentRow)
+            {
+                rowDirection = (row - CurrentRow) / rowDiff;
+            }
+
+            if (col != CurrentColumn)
+            {
+                colDirection = (col - CurrentColumn) / colDiff;
+            }
+
+            int currentRow = CurrentRow + rowDirection;
+            int currentCol = CurrentColumn + colDirection;
+
+            while (currentRow != row || currentCol != col)
+            {
+                if (board.IsOccupied(currentRow, currentCol))
+                {
+                    return false; // Geçişte herhangi bir taş varsa, hedef hücreye gidemez.
+                }
+
+                currentRow += rowDirection;
+                currentCol += colDirection;
+            }
+
+   
+            return true; // Geçerli bir hamle, hiçbir taş olmadan hedef hücreye ulaşabilir.
         }
+
     }
 
 }

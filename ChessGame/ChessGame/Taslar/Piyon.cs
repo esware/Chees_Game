@@ -86,5 +86,44 @@ namespace ChessGame.Taslar
             return false;
         }
 
+        public bool CanMoves(int row, int col, ChessBoard board)
+        {
+            int rowDiff = CurrentRow - row;
+            int colDiff = CurrentColumn - col;
+            bool notDiff = colDiff == 0 && rowDiff == 0;
+            
+            if (IsFirstMove && colDiff == 0 && rowDiff == 2)
+            {
+                if (notDiff)
+                {
+                    return false;
+                }
+                // Eğer hedef hücre dolu ise hareket engellenir
+                if (!board.IsOccupied(row, col))
+                {
+                    return true;
+                }
+            }
+                
+            else if (rowDiff == 1 && colDiff == 0)
+            {
+                // Eğer hedef hücre dolu ise hareket engellenir
+                if (!board.IsOccupied(row, col))
+                {
+                    return true;
+                }
+            }
+            else if (rowDiff == 1 && Math.Abs(colDiff) == 1)
+            {
+                // Eğer hedef hücrede rakip taş varsa piyon taşıyı yiyor
+                if (board.IsOccupied(row, col) && board.GetPieceAtPosition(row, col).Color == PieceColor.Black)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     }
 }

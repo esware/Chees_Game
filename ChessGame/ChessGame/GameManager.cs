@@ -2,12 +2,12 @@
 
 namespace ChessGame
 {
-    public class Game
+    public class GameManager
     {
         private Player[] players;
         private int currentPlayerIndex;
 
-        public Game()
+        public GameManager()
         {
             Player player1 = new Player("Beyaz", PieceColor.White);
             Player player2 = new Player("Siyah", PieceColor.Black);

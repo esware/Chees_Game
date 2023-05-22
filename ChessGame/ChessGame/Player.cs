@@ -7,7 +7,6 @@ namespace ChessGame
         public string Name { get; set; }
         public PieceColor Color { get; set; }
         public bool IsTurn { get; set; }
-
         public Player(string name, PieceColor color)
         {
             Name = name;
