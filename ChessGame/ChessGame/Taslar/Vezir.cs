@@ -51,6 +51,7 @@ namespace ChessGame.Taslar
             return true; // Geçerli bir hamle, hiçbir taş olmadan hedef hücreye ulaşabilir.
         }
 
+
     }
 
 }

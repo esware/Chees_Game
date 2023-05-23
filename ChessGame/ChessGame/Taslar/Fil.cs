@@ -25,9 +25,7 @@ namespace ChessGame.Taslar
                 while (currentRow != row && currentCol != col)
                 {
                     if (board.IsOccupied(currentRow, currentCol))
-                    {
                         return false;
-                    }
 
                     currentRow += rowDirection;
                     currentCol += colDirection;
@@ -35,13 +33,12 @@ namespace ChessGame.Taslar
 
                 ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
                 if (targetPiece == null || targetPiece.Color != this.Color)
-                {
                     return true;
-                }
             }
 
             return false;
         }
+
 
     }
 

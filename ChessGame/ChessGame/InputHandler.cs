@@ -10,7 +10,8 @@ namespace ChessGame
     {
         private ChessBoard board;
         private ChessPiece selectedPiece;
-
+        private Button _button;
+        private Player currentPlayer;
         public InputHandler(ChessBoard board)
         {
             selectedPiece = null;
@@ -19,75 +20,82 @@ namespace ChessGame
 
         public void Tile_Click(object sender, EventArgs e)
         {
-            Button button = (Button)sender;
-            Tuple<int, int> position = (Tuple<int, int>)button.Tag;
-            Player currentPlayer = board.GameManager.GetCurrentPlayer();
-            
-            // Eğer seçilmiş bir taş yok ise, tıklanan hücredeki taşı seçeriz
+            _button = (Button)sender;
+            Tuple<int, int> position = (Tuple<int, int>)_button.Tag;
+            currentPlayer = board.GameManager.GetCurrentPlayer();
+
+            // Seçili taşı kontrol et
             if (selectedPiece == null)
             {
-                ChessPiece piece = board.GetPieceAtPosition(position.Item1, position.Item2);
-                if (piece != null)
-                {
-                    // Hamle sırası kontrolü
-                    if (piece.Color == currentPlayer.Color)
-                    {
-                        selectedPiece = piece;
-                        selectedPiece.IsSelected = true;
-                        button.BackColor = Color.Bisque;
-                    }
-                }
+                SelectPiece(position, currentPlayer);
             }
             else if (board.IsKingInCheck(currentPlayer.Color, board))
             {
-                if (!board.IsCheckmateForPiece(selectedPiece,selectedPiece.Color,board))
+                
+                if (!board.IsCheckmateForPiece(selectedPiece, selectedPiece.Color, board))
                 {
-                    MessageBox.Show("selected not null");
-                    board.MovePiece(selectedPiece.CurrentRow, selectedPiece.CurrentColumn, position.Item1, position.Item2);
-                    if (selectedPiece.Type == ChessPieceType.Piyon)
-                    {
-                        selectedPiece.IsFirstMove = false;
-                    }
-                    board.UpdateBoard();
-                    // Hamle sırasını değiştir
-                    board.GameManager.ChangeTurn();
-                    selectedPiece = null;
+                    MovePiece(position);
                 }
                 else
                 {
-                    MessageBox.Show("selected null");
-                    selectedPiece = null;
+                    ResetSelection();
                 }
             }
-            else // Eğer seçilmiş bir taş var ise, tıklanan hücreye gidip gidemeyeceğini kontrol ederiz
+            else
             {
-
-                if (selectedPiece.CanMove(position.Item1, position.Item2, board))
+                if (board.IsCheckmateForPiece(selectedPiece, selectedPiece.Color, board))
                 {
-                    var color = currentPlayer.Color == PieceColor.White ? PieceColor.Black : PieceColor.White;
-                    // Taşı hareket ettiririz
-                    
-                    board.MovePiece(selectedPiece.CurrentRow, selectedPiece.CurrentColumn, position.Item1, position.Item2);
-                    if (selectedPiece.Type == ChessPieceType.Piyon)
-                    {
-                        selectedPiece.IsFirstMove = false;
-                    }
-                    board.UpdateBoard();
-                    
-                    if (board.IsKingInCheck(color, board))
-                    {
-                        string winner = (board.GameManager.GetCurrentPlayer().Color == PieceColor.White) ? "Beyaz" : "Siyah";
-                        MessageBox.Show($"{winner} Şah çekti!");
-                    }
-                    // Hamle sırasını değiştir
-                    board.GameManager.ChangeTurn();
-                    selectedPiece = null;
+                    ResetSelection();
                 }
                 else
                 {
-                    selectedPiece = null;
+                    MovePiece(position);
                 }
             }
         }
+
+        private void SelectPiece(Tuple<int, int> position, Player currentPlayer)
+        {
+            ChessPiece piece = board.GetPieceAtPosition(position.Item1, position.Item2);
+            if (piece != null && piece.Color == currentPlayer.Color)
+            {
+                selectedPiece = piece;
+                selectedPiece.IsSelected = true;
+                _button.BackColor = Color.Bisque;
+            }
+        }
+
+        private void MovePiece(Tuple<int, int> position)
+        {
+            if (selectedPiece.CanMove(position.Item1, position.Item2, board))
+            {
+                var color = currentPlayer.Color == PieceColor.White ? PieceColor.Black : PieceColor.White;
+                board.MovePiece(selectedPiece.CurrentRow, selectedPiece.CurrentColumn, position.Item1, position.Item2);
+                if (selectedPiece.Type == ChessPieceType.Piyon)
+                {
+                    selectedPiece.IsFirstMove = false;
+                }
+                board.UpdateBoard();
+
+                if (board.IsKingInCheck(color, board))
+                {
+                    string winner = (board.GameManager.GetCurrentPlayer().Color == PieceColor.White) ? "Beyaz" : "Siyah";
+                    MessageBox.Show($"{winner} Şah çekti!");
+                }
+
+                board.GameManager.ChangeTurn();
+                selectedPiece = null;
+            }
+            else
+            {
+                ResetSelection();
+            }
+        }
+
+        private void ResetSelection()
+        {
+            selectedPiece = null;
+        }
+
     }
 }
