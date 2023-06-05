@@ -69,7 +69,7 @@ namespace ChessGame
                 {
                     selectedPiece.IsFirstMove = false;
                 }
-               
+                board.UpdateBoard();
 
                 if (board.IsKingInCheck(color, board))
                 {
@@ -84,7 +84,6 @@ namespace ChessGame
             {
                 ResetSelection();
             }
-            board.UpdateBoard();
         }
 
         private void ResetSelection()

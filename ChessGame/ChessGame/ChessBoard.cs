@@ -261,41 +261,55 @@ namespace ChessGame
 
             return false;
         }
-        public void UndoMove(ChessPiece removedPiece)
-        {
-            // Taşı listedeki eski pozisyonuna geri yerleştirme
-            removedPiece.CurrentRow = removedPiece.CurrentRow;
-            removedPiece.CurrentColumn = removedPiece.CurrentColumn;
 
-            // Taşı tekrar `pieces` listesine ekme
-            pieces.Add(removedPiece);
-        }
         public bool CanMoveInCheck(ChessPiece chessPiece, PieceColor color, ChessBoard board, int row, int col)
         {
             if (chessPiece != null && chessPiece.Color == color)
             {
-                ChessPiece originalPiece = GetPieceAtPosition(chessPiece.CurrentRow, chessPiece.CurrentColumn);
+                // Taşın mevcut konumu ve durumu
+                int originalRow = chessPiece.CurrentRow;
+                int originalCol = chessPiece.CurrentColumn;
+                bool isKingSafe = true;
 
-                if (chessPiece.CanMove(row, col, board))
+                // Hedef konumda bir taş varsa al
+                ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
+
+                // Hedef konuma taşı yerleştir
+                board.MovePiece(originalRow,originalCol, row, col);
+
+                // Sah tehdit altında mı kontrol et
+                if (IsKingInCheck(color, board))
                 {
-                    // Sah bu hamle ile tehdit altında olmayacak mı kontrol etme
-                    // Hamleyi geçici olarak yapma
-                    board.MovePiece(chessPiece.CurrentRow, chessPiece.CurrentColumn, row, col);
-                    
-                    // Sah tehdit altında mı kontrol etme
-                    bool isKingSafe = !IsKingInCheck(color, board);
-                    
-                    // Hamleyi geri alma
-                    UndoMove(originalPiece);
-
-                    if (isKingSafe)
+                    // Eğer hedef konumda bir taş varsa tekrar yerleştir
+                    if (targetPiece != null)
                     {
-                        return true;
+                        board.MovePiece(targetPiece.CurrentRow,targetPiece.CurrentColumn, row, col);
+                    }
+                    else
+                    {
+                        // Eğer sah durumunda ise taşı geri al
+                        board.MovePiece(chessPiece.CurrentRow,chessPiece.CurrentColumn, originalRow, originalCol);
+                    }
+                    isKingSafe = false;
+                }
+                else
+                {
+                    // Eğer sah durumunda değilse taşı geri al
+                    board.MovePiece(chessPiece.CurrentRow,chessPiece.CurrentColumn, originalRow, originalCol);
+
+                    // Eğer hedef konumda bir taş varsa tekrar yerleştir
+                    if (targetPiece != null)
+                    {
+                        board.MovePiece(targetPiece.CurrentRow,targetPiece.CurrentColumn, row, col);
                     }
                 }
+
+                return isKingSafe;
             }
+
             return false;
         }
+
 
         public void RemovePiece(ChessPiece piece)
         {
