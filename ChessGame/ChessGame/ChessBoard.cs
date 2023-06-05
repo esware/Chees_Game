@@ -6,10 +6,10 @@ using ChessGame.Taslar;
 
 namespace ChessGame
 {
-    public class ChessBoard : Form 
+    public class ChessBoard : Form
     {
         public readonly GameManager GameManager;
-        
+
         private int tileSize = 60;
         private const int ROWS = 8;
         private const int COLUMNS = 8;
@@ -31,12 +31,14 @@ namespace ChessGame
             SetupChessBoard();
             InitializeComponent();
         }
+
         private void SetupChessBoard()
         {
             panel1.Size = new Size(tileSize * 10, tileSize * 10);
-            panel1.Location = new Point(( panel1.Width-this.Width) / 2, ( panel1.Height-this.Height) / 2);
+            panel1.Location = new Point((panel1.Width - this.Width) / 2, (panel1.Height - this.Height) / 2);
             this.Controls.Add(panel1);
         }
+
         private void SetupChessPieces()
         {
             for (int i = 0; i < COLUMNS; i++)
@@ -50,7 +52,7 @@ namespace ChessGame
                     button.Location = new Point(j * tileSize, i * tileSize);
                     button.Tag = new Tuple<int, int>(i, j);
                     buttons[i, j] = button;
-                    
+
                     // Taşların yerleştirilmesi
                     ChessPiece piece = null;
                     if (i == 0 || i == 7)
@@ -87,6 +89,7 @@ namespace ChessGame
                 }
             }
         }
+
         private void SetupLabels()
         {
             for (int i = 0; i < COLUMNS; i++)
@@ -111,6 +114,7 @@ namespace ChessGame
                 this.Controls.Add(rowLabels[i]);
             }
         }
+
         private void InitializeComponent()
         {
             this.SuspendLayout();
@@ -118,18 +122,20 @@ namespace ChessGame
             {
                 button.Click += new EventHandler(_inputHandler.Tile_Click);
             }
-            this.ClientSize = new System.Drawing.Size(800,800);
+
+            this.ClientSize = new System.Drawing.Size(800, 800);
             this.Name = "ChessBoard";
             this.ResumeLayout(false);
 
         }
+
         public void UpdateBoard()
         {
             foreach (Control control in panel1.Controls)
             {
                 if (control is Button button)
                 {
-                    Tuple<int, int> position = (Tuple<int,int>)button.Tag;
+                    Tuple<int, int> position = (Tuple<int, int>)button.Tag;
                     ChessPiece piece = GetPieceAtPosition(position.Item1, position.Item2);
 
                     if (piece != null)
@@ -141,10 +147,15 @@ namespace ChessGame
                     {
                         button.BackgroundImage = null;
                     }
-                    button.BackColor = (position.Item1 + position.Item2) % 2 == 0 ? Color.Black : Color.White; // siyah ve beyaz karelerin arka plan rengi
+
+                    button.BackColor =
+                        (position.Item1 + position.Item2) % 2 == 0
+                            ? Color.Black
+                            : Color.White; // siyah ve beyaz karelerin arka plan rengi
                 }
             }
         }
+
         public ChessPiece GetPieceAtPosition(int row, int col)
         {
             foreach (ChessPiece piece in pieces)
@@ -157,6 +168,7 @@ namespace ChessGame
 
             return null;
         }
+
         public void MovePiece(int fromRow, int fromCol, int toRow, int toCol)
         {
             // Başlangıç pozisyonundaki taşın alınması
@@ -167,7 +179,7 @@ namespace ChessGame
                 Console.WriteLine("Error: No piece found at starting position.");
                 return;
             }
-            
+
             // Taşın hedef pozisyona taşınması
             if (movingPiece.CanMove(toRow, toCol, this))
             {
@@ -193,6 +205,7 @@ namespace ChessGame
                 return;
             }
         }
+
         public bool IsOccupied(int row, int column)
         {
             if (row < 0 || row >= ROWS || column < 0 || column >= COLUMNS)
@@ -208,8 +221,10 @@ namespace ChessGame
                     return true;
                 }
             }
+
             return false;
         }
+
         public Tuple<int, int> FindKingPosition(PieceColor kingColor)
         {
             foreach (ChessPiece piece in pieces)
@@ -223,6 +238,7 @@ namespace ChessGame
             // Hedef renkteki kral bulunamazsa (-1, -1) dön
             return Tuple.Create(-1, -1);
         }
+
         public bool IsKingInCheck(PieceColor kingColor, ChessBoard board)
         {
             // Hedef kralın pozisyonunu bulma
@@ -245,38 +261,41 @@ namespace ChessGame
 
             return false;
         }
-        public bool IsCheckmateForPiece(ChessPiece chessPiece,PieceColor color,ChessBoard board)
+
+        public bool CanMoveInCheck(ChessPiece chessPiece, PieceColor color, ChessBoard board, int row, int col)
         {
             if (chessPiece != null && chessPiece.Color == color)
             {
                 Tuple<int, int> originalPiecePos = new Tuple<int, int>(chessPiece.CurrentRow, chessPiece.CurrentColumn);
-                for (int row = 0; row < ROWS; row++)
+
+                if (chessPiece.CanMove(row, col, board))
                 {
-                    for (int col = 0; col < COLUMNS; col++)
+                    // Sah bu hamle ile tehdit altında olmayacak mı kontrol etme
+                    // Hamleyi geçici olarak yapma
+                    board.MovePiece(chessPiece.CurrentRow, chessPiece.CurrentColumn, row, col);
+                    
+                    // Sah tehdit altında mı kontrol etme
+                    bool isKingSafe = !IsKingInCheck(color, board);
+                    
+                    // Hamleyi geri alma
+                    board.MovePiece(chessPiece.CurrentRow, chessPiece.CurrentColumn, originalPiecePos.Item1,
+                        originalPiecePos.Item2);
+
+                    if ( GetPieceAtPosition(row, col)!= null)
                     {
-                        if (chessPiece.CanMove(row, col, board))
-                        {
-                            // Sah bu hamle ile tehdit altında olmayacak mı kontrol etme
-                            // Hamleyi geçici olarak yapma
-                            board.MovePiece(chessPiece.CurrentRow, chessPiece.CurrentColumn, row, col);
+                        var removedPiece = GetPieceAtPosition(row, col);
+                        pieces.Remove(GetPieceAtPosition(row, col)); 
+                        isKingSafe = !IsKingInCheck(color, board);
+                        pieces.Add(removedPiece);
+                    }
 
-                            // Sah tehdit altında mı kontrol etme
-                            bool isKingSafe = !IsKingInCheck(color, board);
-
-                            // Hamleyi geri alma
-
-                            board.MovePiece(chessPiece.CurrentRow,chessPiece.CurrentColumn,originalPiecePos.Item1, originalPiecePos.Item2 );
-
-                            if (isKingSafe)
-                            {
-                                // Sah bu hamle ile tehdit altında olmayacak, mat durumu yok
-                                return false;
-                            }
-                        }
+                    if (isKingSafe)
+                    {
+                        return true;
                     }
                 }
             }
-            return true;
+            return false;
         }
     }
 }

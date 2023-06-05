@@ -32,7 +32,7 @@ namespace ChessGame
             else if (board.IsKingInCheck(currentPlayer.Color, board))
             {
                 
-                if (!board.IsCheckmateForPiece(selectedPiece, selectedPiece.Color, board))
+                if (board.CanMoveInCheck(selectedPiece, selectedPiece.Color, board,position.Item1,position.Item2))
                 {
                     MovePiece(position);
                 }
@@ -43,14 +43,7 @@ namespace ChessGame
             }
             else
             {
-                if (board.IsCheckmateForPiece(selectedPiece, selectedPiece.Color, board))
-                {
-                    ResetSelection();
-                }
-                else
-                {
-                    MovePiece(position);
-                }
+                MovePiece(position);
             }
         }
 
