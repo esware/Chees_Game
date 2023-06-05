@@ -51,7 +51,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GameManager.cs" />
-    <Compile Include="GameState.cs" />
     <Compile Include="InputHandler.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />

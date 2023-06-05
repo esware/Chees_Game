@@ -15,7 +15,11 @@ namespace ChessGame.Taslar
             if ((rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2))
             {
                 ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
-                if (targetPiece == null || targetPiece.Color != this.Color)
+                if (targetPiece == null )
+                {
+                    return true;
+                }
+                if (targetPiece.Color != this.Color)
                 {
                     return true;
                 }

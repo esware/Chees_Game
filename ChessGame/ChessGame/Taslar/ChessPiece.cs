@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace ChessGame.Taslar
 {
+
     public enum PieceColor { White, Black }
     public enum ChessPieceType { Kale,Fil,At,Kral,Piyon,Vezir }
 
@@ -17,7 +19,7 @@ namespace ChessGame.Taslar
         public int CurrentColumn { get; set; }
         public Image Image { get; set; }
         public Button Button { get; set; }
-
+        
         public ChessPiece(PieceColor color, ChessPieceType type, int row, int col,Button btn)
         {
             this.Type = type;

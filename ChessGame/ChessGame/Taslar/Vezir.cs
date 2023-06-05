@@ -11,7 +11,6 @@ namespace ChessGame.Taslar
 
         public override bool CanMove(int row, int col, ChessBoard board)
         {
-
             int rowDiff = Math.Abs(row - CurrentRow);
             int colDiff = Math.Abs(col - CurrentColumn);
 
@@ -20,18 +19,8 @@ namespace ChessGame.Taslar
                 return false; // Vezir sadece düz, çapraz veya yatay hareket edebilir.
             }
 
-            int rowDirection = 0;
-            int colDirection = 0;
-
-            if (row != CurrentRow)
-            {
-                rowDirection = (row - CurrentRow) / rowDiff;
-            }
-
-            if (col != CurrentColumn)
-            {
-                colDirection = (col - CurrentColumn) / colDiff;
-            }
+            int rowDirection = rowDiff == 0 ? 0 : (row - CurrentRow) / rowDiff;
+            int colDirection = colDiff == 0 ? 0 : (col - CurrentColumn) / colDiff;
 
             int currentRow = CurrentRow + rowDirection;
             int currentCol = CurrentColumn + colDirection;
@@ -47,9 +36,20 @@ namespace ChessGame.Taslar
                 currentCol += colDirection;
             }
 
-   
-            return true; // Geçerli bir hamle, hiçbir taş olmadan hedef hücreye ulaşabilir.
+            ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
+            if (targetPiece == null)
+            {
+                return true; // Hedef hücre boş ise geçerli bir hamledir.
+            }
+            
+            if (targetPiece.Color != this.Color)
+            {
+                return true; // Hedef hücredeki taş rakip taş ise geçerli bir hamledir.
+            }
+
+            return false; // Hedef hücrede aynı renkte bir taş var, geçersiz hamle.
         }
+
 
 
     }
