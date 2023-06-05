@@ -193,9 +193,9 @@ namespace ChessGame
                 // Hedef pozisyonda taş varsa taşın alınması ve yerine hareket eden taşın yerleştirilmesi
                 else
                 {
+                    pieces.Remove(targetPiece);
                     movingPiece.CurrentRow = toRow;
                     movingPiece.CurrentColumn = toCol;
-                    pieces.Remove(targetPiece);
                 }
             }
             else
@@ -261,12 +261,20 @@ namespace ChessGame
 
             return false;
         }
+        public void UndoMove(ChessPiece removedPiece)
+        {
+            // Taşı listedeki eski pozisyonuna geri yerleştirme
+            removedPiece.CurrentRow = removedPiece.CurrentRow;
+            removedPiece.CurrentColumn = removedPiece.CurrentColumn;
 
+            // Taşı tekrar `pieces` listesine ekme
+            pieces.Add(removedPiece);
+        }
         public bool CanMoveInCheck(ChessPiece chessPiece, PieceColor color, ChessBoard board, int row, int col)
         {
             if (chessPiece != null && chessPiece.Color == color)
             {
-                Tuple<int, int> originalPiecePos = new Tuple<int, int>(chessPiece.CurrentRow, chessPiece.CurrentColumn);
+                ChessPiece originalPiece = GetPieceAtPosition(chessPiece.CurrentRow, chessPiece.CurrentColumn);
 
                 if (chessPiece.CanMove(row, col, board))
                 {
@@ -278,16 +286,7 @@ namespace ChessGame
                     bool isKingSafe = !IsKingInCheck(color, board);
                     
                     // Hamleyi geri alma
-                    board.MovePiece(chessPiece.CurrentRow, chessPiece.CurrentColumn, originalPiecePos.Item1,
-                        originalPiecePos.Item2);
-
-                    if ( GetPieceAtPosition(row, col)!= null)
-                    {
-                        var removedPiece = GetPieceAtPosition(row, col);
-                        pieces.Remove(GetPieceAtPosition(row, col)); 
-                        isKingSafe = !IsKingInCheck(color, board);
-                        pieces.Add(removedPiece);
-                    }
+                    UndoMove(originalPiece);
 
                     if (isKingSafe)
                     {
@@ -296,6 +295,11 @@ namespace ChessGame
                 }
             }
             return false;
+        }
+
+        public void RemovePiece(ChessPiece piece)
+        {
+            pieces.Remove(piece);
         }
     }
 }

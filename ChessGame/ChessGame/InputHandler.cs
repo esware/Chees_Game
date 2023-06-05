@@ -62,13 +62,14 @@ namespace ChessGame
         {
             if (selectedPiece.CanMove(position.Item1, position.Item2, board))
             {
+                
                 var color = currentPlayer.Color == PieceColor.White ? PieceColor.Black : PieceColor.White;
                 board.MovePiece(selectedPiece.CurrentRow, selectedPiece.CurrentColumn, position.Item1, position.Item2);
                 if (selectedPiece.Type == ChessPieceType.Piyon)
                 {
                     selectedPiece.IsFirstMove = false;
                 }
-                board.UpdateBoard();
+               
 
                 if (board.IsKingInCheck(color, board))
                 {
@@ -83,6 +84,7 @@ namespace ChessGame
             {
                 ResetSelection();
             }
+            board.UpdateBoard();
         }
 
         private void ResetSelection()
