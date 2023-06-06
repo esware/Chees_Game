@@ -32,6 +32,9 @@ namespace ChessGame.Taslar
                 if (rowDiff == 1 && colDiff == 1 && board.IsOccupied(row, col) &&
                     board.GetPieceAtPosition(row, col).Color == PieceColor.Black)
                     return true;
+                if (rowDiff == 1 && colDiff == -1 && board.IsOccupied(row, col) &&
+                   board.GetPieceAtPosition(row, col).Color == PieceColor.White)
+                    return true;
             }
             else if (this.Color == PieceColor.Black)
             {
@@ -43,6 +46,9 @@ namespace ChessGame.Taslar
 
                 if (rowDiff == -1 && colDiff == -1 && board.IsOccupied(row, col) &&
                     board.GetPieceAtPosition(row, col).Color == PieceColor.White)
+                    return true;
+                if (rowDiff == -1 && colDiff == 1 && board.IsOccupied(row, col) &&
+                   board.GetPieceAtPosition(row, col).Color == PieceColor.White)
                     return true;
 
             }

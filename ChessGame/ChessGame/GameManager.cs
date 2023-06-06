@@ -21,6 +21,11 @@ namespace ChessGame
             return players[currentPlayerIndex];
         }
 
+        public string GetCurrentPlayerName()
+        {
+            return players[currentPlayerIndex].Name;
+        }
+
         public void ChangeTurn()
         {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;

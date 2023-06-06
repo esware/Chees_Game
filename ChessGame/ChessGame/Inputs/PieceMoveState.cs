@@ -78,6 +78,7 @@ namespace ChessGame.Inputs
                     }
                 }
                 board.GameManager.ChangeTurn();
+                board.UpdatePlayerInfo();
                 _inputHandler.ResetSelection();
                 
             }

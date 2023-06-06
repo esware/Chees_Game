@@ -18,6 +18,12 @@ namespace ChessGame
         private Label[] rowLabels = new Label[ROWS];
         private Panel panel1 = new Panel();
         private InputHandler _inputHandler;
+        private Label playerInfoLabel;
+        private ImageList beyazTaslar;
+        private System.ComponentModel.IContainer components;
+        private ImageList siyahTaslar;
+        private ListView beyazTaslarListesi;
+        private ListView listView1;
         private List<ChessPiece> pieces = new List<ChessPiece>();
 
         public ChessBoard()
@@ -28,8 +34,27 @@ namespace ChessGame
             SetupChessPieces();
             GameManager = new GameManager();
             GameManager.GetCurrentPlayer();
+           
             SetupChessBoard();
             InitializeComponent();
+            SignUpEvents();
+            UpdatePlayerInfo();
+        }
+
+        private void SignUpEvents()
+        {
+            this.SuspendLayout();
+            foreach (var button in buttons)
+            {
+                button.Click += new EventHandler(_inputHandler.HandleInput);
+                button.MouseDown += _inputHandler.ShowProperties;
+            }
+
+            this.ClientSize = new System.Drawing.Size(800, 800);
+            this.Name = "ChessBoard";
+            this.Text = "Chess Game";
+            this.ResumeLayout(false);
+            this.PerformLayout();
         }
 
         private void SetupChessBoard()
@@ -119,17 +144,66 @@ namespace ChessGame
 
         private void InitializeComponent()
         {
-            
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChessBoard));
+            this.playerInfoLabel = new System.Windows.Forms.Label();
+            this.beyazTaslar = new System.Windows.Forms.ImageList(this.components);
+            this.siyahTaslar = new System.Windows.Forms.ImageList(this.components);
+            this.beyazTaslarListesi = new System.Windows.Forms.ListView();
+            this.listView1 = new System.Windows.Forms.ListView();
             this.SuspendLayout();
-            foreach (var button in buttons)
-            {
-                button.Click += new EventHandler(_inputHandler.HandleInput);
-                button.MouseDown += _inputHandler.ShowProperties;
-            }
-
-            this.ClientSize = new System.Drawing.Size(800, 800);
+            // 
+            // playerInfoLabel
+            // 
+            this.playerInfoLabel.AutoSize = true;
+            this.playerInfoLabel.Location = new System.Drawing.Point(350, 50);
+            this.playerInfoLabel.Name = "playerInfoLabel";
+            this.playerInfoLabel.Size = new System.Drawing.Size(72, 13);
+            this.playerInfoLabel.TabIndex = 0;
+            this.playerInfoLabel.Text = "Oyuncu Sirasi";
+            this.playerInfoLabel.Click += new System.EventHandler(this.playerInfoLabel_Click);
+            // 
+            // beyazTaslar
+            // 
+            this.beyazTaslar.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("beyazTaslar.ImageStream")));
+            this.beyazTaslar.TransparentColor = System.Drawing.Color.White;
+            this.beyazTaslar.Images.SetKeyName(0, "Black_At.png");
+            this.beyazTaslar.Images.SetKeyName(1, "Black_Fil.png");
+            this.beyazTaslar.Images.SetKeyName(2, "White_Fil.png");
+            // 
+            // siyahTaslar
+            // 
+            this.siyahTaslar.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this.siyahTaslar.ImageSize = new System.Drawing.Size(16, 16);
+            this.siyahTaslar.TransparentColor = System.Drawing.Color.Transparent;
+            // 
+            // beyazTaslarListesi
+            // 
+            this.beyazTaslarListesi.HideSelection = false;
+            this.beyazTaslarListesi.LargeImageList = this.beyazTaslar;
+            this.beyazTaslarListesi.Location = new System.Drawing.Point(12, 183);
+            this.beyazTaslarListesi.Name = "beyazTaslarListesi";
+            this.beyazTaslarListesi.Size = new System.Drawing.Size(76, 132);
+            this.beyazTaslarListesi.TabIndex = 1;
+            this.beyazTaslarListesi.UseCompatibleStateImageBehavior = false;
+            // 
+            // listView1
+            // 
+            this.listView1.HideSelection = false;
+            this.listView1.LargeImageList = this.beyazTaslar;
+            this.listView1.Location = new System.Drawing.Point(12, 359);
+            this.listView1.Name = "listView1";
+            this.listView1.Size = new System.Drawing.Size(76, 132);
+            this.listView1.TabIndex = 2;
+            this.listView1.UseCompatibleStateImageBehavior = false;
+            // 
+            // ChessBoard
+            // 
+            this.ClientSize = new System.Drawing.Size(1125, 623);
+            this.Controls.Add(this.listView1);
+            this.Controls.Add(this.beyazTaslarListesi);
+            this.Controls.Add(this.playerInfoLabel);
             this.Name = "ChessBoard";
-            this.Text = "Chess Game";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -200,6 +274,7 @@ namespace ChessGame
                 else
                 {
                     pieces.Remove(targetPiece);
+
                     movingPiece.CurrentRow = toRow;
                     movingPiece.CurrentColumn = toCol;
                 }
@@ -437,10 +512,38 @@ namespace ChessGame
             return false;
         }
 
+        public void UpdatePlayerInfo()
+        {
+            playerInfoLabel.Text = "Oyuncu Sirasi : "+ GameManager.GetCurrentPlayerName();
+        }
 
+        public void UpdateWhiteDeathPiece(Image beyazTasResmi)
+        {
+            Image capturedPieceImage = beyazTasResmi;
+            beyazTaslar.Images.Add(capturedPieceImage);
 
+            ListViewItem capturedPieceItem = new ListViewItem();
+            capturedPieceItem.ImageIndex = beyazTaslar.Images.Count - 1;
 
+            beyazTaslarListesi.Items.Add(capturedPieceItem);
 
+        }
 
+        public void UpdateBlackDeathPiece( Image siyahTasResmi)
+        {
+
+            Image capturedPieceImage2 = siyahTasResmi;
+            siyahTaslar.Images.Add(capturedPieceImage2);
+
+            ListViewItem capturedPieceItem2 = new ListViewItem();
+            capturedPieceItem2.ImageIndex = siyahTaslar.Images.Count - 1;
+
+            listView1.Items.Add(capturedPieceItem2);
+        }
+
+        private void playerInfoLabel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
