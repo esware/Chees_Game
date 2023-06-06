@@ -75,6 +75,7 @@ namespace ChessGame
 
                         if (piece != null)
                         {
+                            //button.Tag = (ChessPiece)piece;
                             button.BackgroundImage = piece.Image;
                             button.BackgroundImageLayout = ImageLayout.Stretch;
                         }
@@ -83,6 +84,7 @@ namespace ChessGame
                     {
                         pieces.Add(piece = new Piyon(i == 1 ? PieceColor.Black : PieceColor.White,
                             ChessPieceType.Piyon, i, j, button));
+                        //button.Tag = (ChessPiece)piece;
                         button.BackgroundImage = piece.Image;
                         button.BackgroundImageLayout = ImageLayout.Stretch;
                     }
@@ -117,15 +119,19 @@ namespace ChessGame
 
         private void InitializeComponent()
         {
+            
             this.SuspendLayout();
             foreach (var button in buttons)
             {
-                button.Click += new EventHandler(_inputHandler.Tile_Click);
+                button.Click += new EventHandler(_inputHandler.HandleInput);
+                button.MouseDown += _inputHandler.ShowProperties;
             }
 
             this.ClientSize = new System.Drawing.Size(800, 800);
             this.Name = "ChessBoard";
+            this.Text = "Chess Game";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -205,6 +211,27 @@ namespace ChessGame
                 return;
             }
         }
+        public void UndoMove(int fromRow, int fromCol, int toRow, int toCol, ChessPiece capturedPiece)
+        {
+            ChessPiece movingPiece = GetPieceAtPosition(toRow, toCol);
+            if (movingPiece == null)
+            {
+                // Taş yoksa hata mesajı yazdırıp metodun sonlandırılması
+                Console.WriteLine("Error: No piece found at target position.");
+                return;
+            }
+
+            // Taşı başlangıç pozisyonuna yerleştirme
+            movingPiece.CurrentRow = fromRow;
+            movingPiece.CurrentColumn = fromCol;
+
+            // Eğer yakalanan bir taş varsa, onu yerine geri yerleştirme
+            if (capturedPiece != null)
+            {
+                pieces.Add(capturedPiece);
+            }
+        }
+
 
         public bool IsOccupied(int row, int column)
         {
@@ -239,10 +266,10 @@ namespace ChessGame
             return Tuple.Create(-1, -1);
         }
 
-        public bool IsKingInCheck(PieceColor kingColor, ChessBoard board)
+        public bool IsKingInCheck(PieceColor kingColor)
         {
             // Hedef kralın pozisyonunu bulma
-            Tuple<int, int> kingPosition = board.FindKingPosition(kingColor);
+            Tuple<int, int> kingPosition = FindKingPosition(kingColor);
 
             // Tüm rakip taşları kontrol etme
             foreach (ChessPiece piece in pieces)
@@ -250,7 +277,7 @@ namespace ChessGame
                 if (piece.Color != kingColor)
                 {
                     // Eğer rakip taş, hedef krala saldırabiliyorsa true döndür
-                    if (piece.CanMove(kingPosition.Item1, kingPosition.Item2, board))
+                    if (piece.CanMove(kingPosition.Item1, kingPosition.Item2,this))
                     {
                         var king = GetPieceAtPosition(kingPosition.Item1, kingPosition.Item2);
                         king.Button.BackColor = Color.Red;
@@ -262,46 +289,31 @@ namespace ChessGame
             return false;
         }
 
-        public bool CanMoveInCheck(ChessPiece chessPiece, PieceColor color, ChessBoard board, int row, int col)
+        public bool CanMoveInCheck(ChessPiece chessPiece, ChessBoard board, int row, int col)
         {
-            if (chessPiece != null && chessPiece.Color == color)
+            if (chessPiece != null)
             {
                 // Taşın mevcut konumu ve durumu
                 int originalRow = chessPiece.CurrentRow;
                 int originalCol = chessPiece.CurrentColumn;
-                bool isKingSafe = true;
 
                 // Hedef konumda bir taş varsa al
                 ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
 
                 // Hedef konuma taşı yerleştir
-                board.MovePiece(originalRow,originalCol, row, col);
+                board.MovePiece(originalRow, originalCol, row, col);
 
                 // Sah tehdit altında mı kontrol et
-                if (IsKingInCheck(color, board))
+                bool isKingSafe = !IsKingInCheck(chessPiece.Color);
+
+                // Hedef konumda bir taş varsa tekrar yerleştir
+                if (targetPiece == null)
                 {
-                    // Eğer hedef konumda bir taş varsa tekrar yerleştir
-                    if (targetPiece != null)
-                    {
-                        board.MovePiece(targetPiece.CurrentRow,targetPiece.CurrentColumn, row, col);
-                    }
-                    else
-                    {
-                        // Eğer sah durumunda ise taşı geri al
-                        board.MovePiece(chessPiece.CurrentRow,chessPiece.CurrentColumn, originalRow, originalCol);
-                    }
-                    isKingSafe = false;
+                    board.UndoMove(originalRow, originalCol,chessPiece.CurrentRow, chessPiece.CurrentColumn,null);
                 }
                 else
                 {
-                    // Eğer sah durumunda değilse taşı geri al
-                    board.MovePiece(chessPiece.CurrentRow,chessPiece.CurrentColumn, originalRow, originalCol);
-
-                    // Eğer hedef konumda bir taş varsa tekrar yerleştir
-                    if (targetPiece != null)
-                    {
-                        board.MovePiece(targetPiece.CurrentRow,targetPiece.CurrentColumn, row, col);
-                    }
+                    board.UndoMove(originalRow, originalCol,chessPiece.CurrentRow, chessPiece.CurrentColumn,targetPiece);
                 }
 
                 return isKingSafe;
@@ -309,11 +321,126 @@ namespace ChessGame
 
             return false;
         }
-
-
-        public void RemovePiece(ChessPiece piece)
+        
+        public bool IsCheckmate(PieceColor kingColor)
         {
-            pieces.Remove(piece);
+            // Şah durumunda mat kontrolü yapmak için önce şah durumunu kontrol et
+            if (!IsKingInCheck(kingColor))
+            {
+                // Şah durumu yoksa mat durumu da yoktur
+                return false;
+            }
+
+            // Kralın mevcut pozisyonunu bulma
+            Tuple<int, int> kingPosition = FindKingPosition(kingColor);
+            ChessPiece king = GetPieceAtPosition(kingPosition.Item1, kingPosition.Item2);
+
+            // Kralın tüm hamlelerini deneme
+            for (int row = 0; row < 8; row++)
+            {
+                for (int col = 0; col < 8; col++)
+                {
+                    // Geçerli bir konum mu?
+                    if (king.CanMove(row, col, this))
+                    {
+                        // Hamleyi geçici olarak yap
+                        MovePiece(kingPosition.Item1, kingPosition.Item2, row, col);
+
+                        // Kral hala şah altında mı?
+                        if (!IsKingInCheck(kingColor))
+                        {
+                            // Hamleyi geri al
+                            UndoMove(kingPosition.Item1, kingPosition.Item2, row, col, null);
+                            return false;
+                        }
+
+                        // Hamleyi geri al
+                        UndoMove(kingPosition.Item1, kingPosition.Item2, row, col, null);
+                    }
+                }
+            }
+
+            if (CanAnyPieceMoveInCheck(kingColor,this))
+            {
+                return false;
+            }
+
+            // Kralın tüm hamlelerini denedik, ancak hala şah altında ise mat durumu vardır
+            return true;
         }
+        
+        public List<ChessPiece> GetPiecesByColor(PieceColor color)
+        {
+            List<ChessPiece> pieces = new List<ChessPiece>();
+
+            foreach (ChessPiece piece in this.pieces)
+            {
+                if (piece.Color == color)
+                {
+                    pieces.Add(piece);
+                }
+            }
+
+            return pieces;
+        }
+        
+        public bool CanAnyPieceMoveInCheck(PieceColor color, ChessBoard board)
+        {
+            // Renkteki tüm taşları al
+            List<ChessPiece> pieces = board.GetPiecesByColor(color);
+
+            // Her bir taş için hareketleri kontrol et
+            foreach (ChessPiece piece in pieces)
+            {
+                // Taşın mevcut konumu ve durumu
+                int originalRow = piece.CurrentRow;
+                int originalCol = piece.CurrentColumn;
+
+                // Tüm olası hareketleri deneme
+                for (int row = 0; row < 8; row++)
+                {
+                    for (int col = 0; col < 8; col++)
+                    {
+                        // Geçerli bir konum mu?
+                        if (piece.CanMove(row, col, board))
+                        {
+                            // Hedef konumda bir taş varsa al
+                            ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
+
+                            // Hedef konuma taşı yerleştir
+                            board.MovePiece(originalRow, originalCol, row, col);
+
+                            // Sah tehdit altında mı kontrol et
+                            bool isKingSafe = !IsKingInCheck(color);
+
+                            // Hedef konumda bir taş varsa tekrar yerleştir
+                            if (targetPiece == null)
+                            {
+                                board.UndoMove(originalRow, originalCol, row, col, null);
+                            }
+                            else
+                            {
+                                board.UndoMove(originalRow, originalCol, row, col, targetPiece);
+                            }
+
+                            // Eğer kral güvende ise, taş mat durumundan kurtarabiliyor
+                            if (isKingSafe)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Hiçbir taş mat durumundan kurtaramıyor
+            return false;
+        }
+
+
+
+
+
+
     }
 }

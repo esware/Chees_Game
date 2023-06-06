@@ -12,7 +12,6 @@ namespace ChessGame.Taslar
     public abstract class ChessPiece
     {
         public bool IsFirstMove { get; set; } = true;
-        public bool IsSelected { get; set; } = false;
         public ChessPieceType Type { get;  }
         public PieceColor Color { get;  }
         public int CurrentRow { get; set; }

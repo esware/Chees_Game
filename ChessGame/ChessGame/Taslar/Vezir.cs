@@ -8,50 +8,72 @@ namespace ChessGame.Taslar
         public Vezir(PieceColor color, ChessPieceType type, int row, int col, Button btn) : base(color, type, row, col, btn)
         {
         }
-
-        public override bool CanMove(int row, int col, ChessBoard board)
+        
+        public override bool CanMove(int toRow, int toCol, ChessBoard board)
         {
-            int rowDiff = Math.Abs(row - CurrentRow);
-            int colDiff = Math.Abs(col - CurrentColumn);
 
-            if (rowDiff != 0 && colDiff != 0 && rowDiff != colDiff)
+            // Aynı konumda kalma durumu
+            if (CurrentRow == toRow && CurrentColumn == toCol)
             {
-                return false; // Vezir sadece düz, çapraz veya yatay hareket edebilir.
+                return false;
             }
 
-            int rowDirection = rowDiff == 0 ? 0 : (row - CurrentRow) / rowDiff;
-            int colDirection = colDiff == 0 ? 0 : (col - CurrentColumn) / colDiff;
-
-            int currentRow = CurrentRow + rowDirection;
-            int currentCol = CurrentColumn + colDirection;
-
-            while (currentRow != row || currentCol != col)
+            // Hedef konumda kendi takımının bir taşı var mı?
+            ChessPiece targetPiece = board.GetPieceAtPosition(toRow, toCol);
+            if (targetPiece != null && targetPiece.Color == Color)
             {
-                if (board.IsOccupied(currentRow, currentCol))
-                {
-                    return false; // Geçişte herhangi bir taş varsa, hedef hücreye gidemez.
-                }
-
-                currentRow += rowDirection;
-                currentCol += colDirection;
+                return false;
             }
 
-            ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
-            if (targetPiece == null)
-            {
-                return true; // Hedef hücre boş ise geçerli bir hamledir.
-            }
-            
-            if (targetPiece.Color != this.Color)
-            {
-                return true; // Hedef hücredeki taş rakip taş ise geçerli bir hamledir.
-            }
-
-            return false; // Hedef hücrede aynı renkte bir taş var, geçersiz hamle.
+            // Vezirin hareketi, kale veya fil hareketi gibi olabilir
+            return CanMoveLikeRook(toRow, toCol, board) || CanMoveLikeBishop(toRow, toCol, board);
         }
 
+        private bool CanMoveLikeRook(int toRow, int toCol, ChessBoard board)
+        {
+            int rowDiff = Math.Abs(CurrentRow - toRow);
+            int colDiff = Math.Abs(CurrentColumn - toCol);
 
+            if (rowDiff == 0 || colDiff == 0)
+            {
+                ChessPiece targetPiece = board.GetPieceAtPosition(toRow, toCol);
+                if (targetPiece == null || targetPiece.Color != this.Color)
+                {
+                    return true;
+                }
+            }
 
+            return false;
+        }
+
+        private bool CanMoveLikeBishop(int row, int col, ChessBoard board)
+        {
+            int rowDiff = Math.Abs(CurrentRow - row);
+            int colDiff = Math.Abs(CurrentColumn - col);
+
+            if (rowDiff == colDiff && rowDiff != 0)
+            {
+                int rowDirection = (row - CurrentRow) / rowDiff;
+                int colDirection = (col - CurrentColumn) / colDiff;
+
+                int currentRow = CurrentRow + rowDirection;
+                int currentCol = CurrentColumn + colDirection;
+
+                while (currentRow != row && currentCol != col)
+                {
+                    if (board.IsOccupied(currentRow, currentCol))
+                        return false;
+
+                    currentRow += rowDirection;
+                    currentCol += colDirection;
+                }
+
+                ChessPiece targetPiece = board.GetPieceAtPosition(row, col);
+                if (targetPiece == null || targetPiece.Color != this.Color)
+                    return true;
+            }
+
+            return false;
+        }
     }
-
 }

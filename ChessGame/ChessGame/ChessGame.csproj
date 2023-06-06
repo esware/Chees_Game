@@ -51,7 +51,10 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GameManager.cs" />
-    <Compile Include="InputHandler.cs" />
+    <Compile Include="Inputs\BaseState.cs" />
+    <Compile Include="Inputs\InputHandler.cs" />
+    <Compile Include="Inputs\PieceMoveState.cs" />
+    <Compile Include="Inputs\PieceSelectionState.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
